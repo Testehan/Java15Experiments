@@ -1,0 +1,67 @@
+Check here all new features of Java 15 : https://openjdk.org/projects/jdk/15/
+
+
+
+JDK 15 new features
+
+    1. JEP 371: Hidden Classes
+        Summary
+            Introduce hidden classes, which are classes that cannot be used directly by the bytecode of other classes.
+            Hidden classes are intended for use by frameworks that generate classes at run time and use them
+            indirectly, via reflection.
+
+        Motivation
+            Many language implementations built on the JVM rely upon dynamic class generation for flexibility and
+            efficiency. For example, in the case of the Java language, javac does not translate a lambda expression
+            into a dedicated class file at compile time but, rather, emits bytecode that dynamically generates
+            and instantiates a class to yield an object corresponding to the lambda expression when needed.
+            Similarly, runtimes for non-Java languages often implement the higher-order features of those
+            languages by using dynamic proxies, which also generate classes dynamically.
+
+        Hidden classes in stack traces
+            Methods of hidden classes are not shown in stack traces by default. They represent implementation
+            details of language runtimes, and are never expected to be useful to developers diagnosing application
+            issues. However, they can be included in stack traces via the options
+             -XX:+UnlockDiagnosticVMOptions -XX:+ShowHiddenFrames.
+
+    2. JEP 378: Text Blocks
+        A text block is a multi-line string literal that avoids the need for most escape sequences, automatically
+        formats the string in a predictable way, and gives the developer control over the format when desired.
+
+        Motivation
+            In Java, embedding a snippet of HTML, XML, SQL, or JSON in a string literal "..." usually requires
+            significant editing with escapes and concatenation before the code containing the snippet will compile.
+            The snippet is often difficult to read and arduous to maintain.
+
+        Description
+            A text block is a new kind of literal in the Java language. It may be used to denote a string anywhere that
+            a string literal could appear, but offers greater expressiveness and less accidental
+            complexity.
+
+            A text block consists of zero or more content characters, enclosed by opening and closing delimiters.
+            The opening delimiter is a sequence of three double quote characters (""")
+
+            The content may include double quote characters directly, unlike the characters in a string literal. The
+            use of \" in a text block is permitted, but not necessary or recommended. Fat delimiters (""") were chosen
+            so that " characters could appear unescaped, and also to visually distinguish a text block from a string literal.
+
+        Compile-time processing
+            A text block is a constant expression of type String, just like a string literal. However, unlike a string
+            literal, the content of a text block is processed by the Java compiler in three distinct steps:
+                -Line terminators in the content are translated to LF (\u000A). The purpose of this translation is to
+                follow the principle of least surprise when moving Java source code across platforms.
+                -Incidental white space surrounding the content, introduced to match the indentation of Java source code,
+                is removed.
+                -Escape sequences in the content are interpreted. Performing interpretation as the final step means
+                developers can write escape sequences such as \n without them being modified or deleted by earlier steps.
+
+            The processed content is recorded in the class file as a CONSTANT_String_info entry in the constant pool,
+            just like the characters of a string literal. The class file does not record whether a
+            CONSTANT_String_info entry was derived from a text block or a string literal.
+
+        Additional Methods
+            The following methods will be added to support text blocks:
+                String::stripIndent(): used to strip away incidental white space from the text block content
+                String::translateEscapes(): used to translate escape sequences
+                String::formatted(Object... args): simplify value substitution in the text block
+
